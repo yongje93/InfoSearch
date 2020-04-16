@@ -80,11 +80,8 @@ public class Cosine_Similarity {
 		Collections.sort(list, new Comparator<Entry<String, Double>>() {
 			@Override
 			public int compare(Entry<String, Double> o1, Entry<String, Double> o2) {
-				int com = o2.getValue().compareTo(o1.getValue());
-				if (o2.getValue() == o1.getValue()) {
-					com = o2.getKey().compareTo(o1.getKey());
-				}
-				return com;
+				int comparision = ((o2.getValue() > o1.getValue() ? 1 : -1));
+				return comparision == 0 ? o2.getKey().compareTo(o1.getKey()) : comparision;
 			}
 		});
 
