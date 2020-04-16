@@ -9,10 +9,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.Set;
 
 public class TF_IDF_COS {
 	private static List<String> allTerms = new ArrayList<>();
@@ -57,34 +59,39 @@ public class TF_IDF_COS {
 			List<String> keyList = new ArrayList<>(tf_idf_cos.sortByValue(findVector));
 			List<String> keyList2 = new ArrayList<>(tf_idf_cos.sortByValue(compareVector));
 
-			List<String> tempList1 = new ArrayList<>(keyList);
-			List<String> tempList2 = new ArrayList<>(keyList2);
+			List<String> allKeyList = new ArrayList<>();
+			allKeyList.addAll(keyList);
+			allKeyList.addAll(keyList2);
 
-			tempList2.removeAll(keyList);
-			tempList1.removeAll(keyList2);
+			Set<String> allkey = new HashSet<>(allKeyList);
 
 			Map<String, Double> top5Vector1 = new HashMap<>();
 			Map<String, Double> top5Vector2 = new HashMap<>();
 
 			for (int j = 0; j < keyList.size(); j++) {
 				top5Vector1.put(keyList.get(j), totalVector.get(findFile).get(keyList.get(j)));
-				top5Vector2.put(keyList2.get(j), totalVector.get(file.getName()).get(keyList2.get(j)));
+			}
+			for (int j = 0; j < keyList2.size(); j++) {
+				top5Vector2.put(keyList2.get(j), totalVector.get(findFile).get(keyList.get(j)));
 			}
 
-			for (String str : tempList1)
-				top5Vector2.put(str, 0.0);
-
-			for (String str : tempList2)
-				top5Vector1.put(str, 0.0);
-
-			List<Double> findList = new ArrayList<>(top5Vector1.values());
-			List<Double> compareList = new ArrayList<>(top5Vector2.values());
-
-			Double[] find = findList.toArray(new Double[findList.size()]);
-			Double[] compare = compareList.toArray(new Double[compareList.size()]);
+			double[] find = new double[allkey.size()];
+			double[] compare = new double[allkey.size()];
+			
+			int j = 0;
+			for (String key : allkey) {
+				if (!top5Vector1.containsKey(key)) {
+					top5Vector1.put(key, 0.0);
+				}
+				if (!top5Vector2.containsKey(key)) {
+					top5Vector2.put(key, 0.0);
+				}
+				find[j] = top5Vector1.get(key);
+				compare[j] = top5Vector2.get(key);
+				j++;
+			}
 
 			cos_result.put(file.getName(), tf_idf_cos.cosineSimilarity(find, compare));
-
 		}
 
 		List<String> keySetList = new ArrayList<>(cos_result.keySet());
@@ -165,16 +172,18 @@ public class TF_IDF_COS {
 		List<Double> result = new ArrayList<>();
 		double tf;
 		double idf;
+		double tfidf = 0.0;
 		for (String[] docTerm : docArrays) {
 			tf = calculateTF(docTerm, findTerm);
 			idf = calculateIDF(docArrays, findTerm);
-			result.add(tf * idf);
+			tfidf = tf * idf;
+			result.add(Math.round(tfidf * 1000) / 1000.0);
 		}
 		return result;
 	}
 
 	// 코사인 유사도 계산
-	public double cosineSimilarity(Double[] find, Double[] compare) {
+	public double cosineSimilarity(double[] find, double[] compare) {
 		if (find == null || compare == null || find.length == 0 || compare.length == 0
 				|| find.length != compare.length) {
 			return 2;
@@ -201,15 +210,16 @@ public class TF_IDF_COS {
 			@Override
 			public int compare(Entry<String, Double> o1, Entry<String, Double> o2) {
 				int comparision = ((o2.getValue() > o1.getValue() ? 1 : -1));
-//                return comparision == 0 ? o2.getKey().compareTo(o1.getKey()) : comparision;
-				return comparision == 0 ? o2.getKey().compareTo(o1.getKey()) * -1 : comparision;
+				return comparision == 0 ? o2.getKey().compareTo(o1.getKey()) : comparision;
+				// return comparision == 0 ? o2.getKey().compareTo(o1.getKey()) * -1 :
+				// comparision;
 			}
 		});
-
 		List<String> top5 = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
 			top5.add(list.get(i).getKey());
 		}
+		System.out.println(top5);
 		return top5;
 	}
 }

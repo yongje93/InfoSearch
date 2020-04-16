@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Scanner;
 
 public class TF_IDF {
-	private static List<String> allTerms = new ArrayList<>();
-	private static List<String[]> docArrays = new ArrayList<>();
+	private List<String> allTerms = new ArrayList<>();
+	private List<String[]> docArrays = new ArrayList<>();
 
 	public static void main(String[] args) {
 		TF_IDF tf_idf = new TF_IDF();
-
+		
 		String path = System.getProperty("user.dir");
 		Scanner scan = new Scanner(System.in);
 
@@ -33,7 +33,7 @@ public class TF_IDF {
 		scan.close();
 	}
 
-	public File[] parseFiles(String filePath) {
+	private File[] parseFiles(String filePath) {
 		File[] files = new File(filePath).listFiles();
 		List<String> fileList = new ArrayList<>();
 		BufferedReader br = null;

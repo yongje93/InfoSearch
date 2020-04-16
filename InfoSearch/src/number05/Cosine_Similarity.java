@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 public class Cosine_Similarity {
@@ -22,31 +24,37 @@ public class Cosine_Similarity {
 			List<String> keyList = new ArrayList<>(sortByValue(findVector));
 			List<String> keyList2 = new ArrayList<>(sortByValue(compareVector));
 
-			List<String> tempList1 = new ArrayList<>(keyList);
-			List<String> tempList2 = new ArrayList<>(keyList2);
+			List<String> allKeyList = new ArrayList<>();
+			allKeyList.addAll(keyList);
+			allKeyList.addAll(keyList2);
 
-			tempList2.removeAll(keyList);
-			tempList1.removeAll(keyList2);
+			Set<String> allkey = new HashSet<>(allKeyList);
 
 			Map<String, Double> top5Vector1 = new HashMap<>();
 			Map<String, Double> top5Vector2 = new HashMap<>();
 
 			for (int j = 0; j < keyList.size(); j++) {
 				top5Vector1.put(keyList.get(j), totalVector.get(findFile).get(keyList.get(j)));
-				top5Vector2.put(keyList2.get(j), totalVector.get(file.getName()).get(keyList2.get(j)));
+			}
+			for (int j = 0; j < keyList2.size(); j++) {
+				top5Vector2.put(keyList2.get(j), totalVector.get(findFile).get(keyList.get(j)));
 			}
 
-			for (String str : tempList1)
-				top5Vector2.put(str, 0.0);
-
-			for (String str : tempList2)
-				top5Vector1.put(str, 0.0);
-
-			List<Double> findList = new ArrayList<>(top5Vector1.values());
-			List<Double> compareList = new ArrayList<>(top5Vector2.values());
-
-			Double[] find = findList.toArray(new Double[findList.size()]);
-			Double[] compare = compareList.toArray(new Double[compareList.size()]);
+			double[] find = new double[allkey.size()];
+			double[] compare = new double[allkey.size()];
+			
+			int j = 0;
+			for (String key : allkey) {
+				if (!top5Vector1.containsKey(key)) {
+					top5Vector1.put(key, 0.0);
+				}
+				if (!top5Vector2.containsKey(key)) {
+					top5Vector2.put(key, 0.0);
+				}
+				find[j] = top5Vector1.get(key);
+				compare[j] = top5Vector2.get(key);
+				j++;
+			}
 
 			cos_result.put(file.getName(), cosineSimilarity(find, compare));
 		}
@@ -54,7 +62,7 @@ public class Cosine_Similarity {
 	}
 
 	// 코사인 유사도 계산
-	public static double cosineSimilarity(Double[] find, Double[] compare) {
+	public static double cosineSimilarity(double[] find, double[] compare) {
 		if (find == null || compare == null || find.length == 0 || compare.length == 0
 				|| find.length != compare.length) {
 			return 2;
